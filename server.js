@@ -1,13 +1,27 @@
-// server.js
+// server.js (UPDATED WITH RATE LIMITING)
 const express = require("express");
 const fetch = require("node-fetch");
 const cors = require("cors");
+const rateLimit = require("express-rate-limit"); // Import the package
 const app = express();
 
+// Apply a rate limiter to all requests
+// This allows 10 requests per minute from a single IP.
+// This is generous for a portfolio but protects against spam bots.
+const limiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 10, 
+  standardHeaders: true,
+  legacyHeaders: false, 
+  message: { error: "Too many requests, please try again after a minute." }
+});
+
+app.use(limiter); // Use the rate limiter
 app.use(cors());
 app.use(express.json());
 
 app.post("/generate", async (req, res) => {
+  // ... rest of your server code remains the same
   const userPrompt = req.body.prompt;
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
